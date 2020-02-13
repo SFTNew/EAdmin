@@ -47,7 +47,17 @@ let baseUrl = "http://127.0.0.1:8082/"
 	    this.set_data(title,url,id);
 	    element.tabChange('xbs_tab', id);
 
-	}
+  }
+  Xadmin.prototype.dateFtt = function(fmt,val){
+    var date = new Date(val);
+    return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+  }
+
+  Xadmin.prototype.getUrlParam = function(name){
+    var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+   var r = window.location.search.substr(1).match(reg);
+   if (r != null) return unescape(r[2]); return null;
+  }
 
   Xadmin.prototype.del_tab = function (id) {
 

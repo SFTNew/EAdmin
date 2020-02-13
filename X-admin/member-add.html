@@ -27,27 +27,27 @@
                     <label for="L_email" class="layui-form-label">
                         <span class="x-red">*</span>问卷标题</label>
                     <div class="layui-input-inline">
-                        <input type="text" id="L_email" name="email" required="" lay-verify="email" autocomplete="off"
-                            class="layui-input">
+                        <input type="text" required="" lay-verify="nikename" autocomplete="off" class="layui-input"
+                            v-model="title">
                     </div>
                 </div>
                 <div class="layui-form-item">
                     <label for="L_username" class="layui-form-label">
                         <span class="x-red">*</span>问卷简介</label>
-                    <div class="layui-input-inline">
-                        <input type="text" id="L_username" name="username" required="" lay-verify="nikename"
-                            autocomplete="off" class="layui-input"></div>
+                    <div style="margin: 0 35px;">
+                        <textarea required="" lay-verify="nikename" v-model="content" autocomplete="off"
+                            class="layui-textarea"></textarea></div>
                 </div>
                 <div id="questions">
 
                 </div>
-                <div class="layui-form-item">
+                <div id="addQuestion" class="layui-form-item">
                     <label for="L_repass" class="layui-form-label">问题类型</label>
                     <div class="layui-input-inline">
                         <select v-model="type" class="valid">
                             <option value="0" selected>单选题</option>
                             <option value="1">多选题</option>
-                            <option value="2" >填空题</option>
+                            <option value="2">填空题</option>
                         </select>
                     </div>
                     <button class="layui-btn" lay-filter="add_question" v-on:click="webAddQuestion">增加问题</button>
@@ -55,7 +55,7 @@
                 </div>
                 <div class="layui-form-item">
                     <label for="L_repass" class="layui-form-label"></label>
-                    <button class="layui-btn" lay-filter="add" lay-submit="">保存</button>
+                    <button class="layui-btn" lay-filter="add" lay-submit="" v-on:click="saveQuestionnaire">保存</button>
                 </div>
 
             </div>
@@ -69,18 +69,49 @@
         var addQuestions = new Vue({
             el: ".layui-fluid",
             data: {
+                id: 0,
                 title: "",
                 content: "",
                 sort: 0,
                 type: 0,
             },
             methods: {
+                saveQuestionnaire: function () {
+                    var param = {
+                        question: this.title,
+                        content: this.content,
+                        status: 0
+                    }
+                    if (this.id == 0) {
+                        $.ajax({
+                            url: baseUrl + "que/v1/",
+                            type: "POST",
+                            dataType: 'json',
+                            contentType: 'application/json',
+                            data: JSON.stringify(param),
+                            success: function (res) {
+                                if (res.code == 0) {
+                                    this.id = res.data
+                                    $("#addQuestion").show();
+                                } else {
+                                    layui.msg("添加失败," + res.msg)
+                                }
+                            }
+                        })
+                    } else {
+                        //关闭当前frame
+                        xadmin.close();
+                        // 可以对父窗口进行刷新 
+                        xadmin.father_reload();
+                    }
+
+                },
                 webAddQuestion: function () {
-                    xadmin.open('添加单选问题','./danxuan.html')
+                    xadmin.open('添加单选问题', './danxuan.html?id='+this.id)
                 },
             },
             created: function () {
-
+                $("#addQuestion").hide();
             }
         })
         layui.use(['form', 'layer', 'jquery'],
@@ -105,22 +136,22 @@
                 });
 
                 //监听提交
-                form.on('submit(add)',
-                    function (data) {
-                        console.log(data);
-                        //发异步，把数据提交给php
-                        layer.alert("增加成功", {
-                            icon: 6
-                        },
-                            function () {
-                                //关闭当前frame
-                                xadmin.close();
+                // form.on('submit(add)',
+                //     function (data) {
+                //         console.log(data);
+                //         //发异步，把数据提交给php
+                //         layer.alert("增加成功", {
+                //             icon: 6
+                //         },
+                //             function () {
+                //                 //关闭当前frame
+                //                 xadmin.close();
 
-                                // 可以对父窗口进行刷新 
-                                xadmin.father_reload();
-                            });
-                        return false;
-                    });
+                //                 // 可以对父窗口进行刷新 
+                //                 xadmin.father_reload();
+                //             });
+                //         return false;
+                //     });
 
             });</script>
 

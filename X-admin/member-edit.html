@@ -46,24 +46,15 @@
                             <div style="margin: 0 35px;" class="layui-form-item" v-for="i in item.content.split(',')" :key="i">
                                 <input type="radio" :name="index+1"  :title="i" class="layui-form-radio">
                             </div>
-                            <div style="margin: 5px 35px;">
-                                <button class="layui-btn" v-on:click="editQuestion(item.id)">修改</button>
-                            </div>
                         </div>
                         <div v-else-if="item.type==1">
                             <div style="margin: 0 35px;" class="layui-form-item" v-for="i in item.content.split(',')" :key="i">
                                 <input type="checkbox" :name="index+1"  :title="i" class="layui-form-radio">
                             </div>
-                            <div style="margin: 5px 35px;">
-                                <button class="layui-btn" v-on:click="editQuestion(item.id)">修改</button>
-                            </div>
                         </div>
                         <div v-else>
                             <div style="margin: 0 35px;" class="layui-form-item" >
                                 <textarea type="checkbox" class="layui-textarea"></textarea>
-                            </div>
-                            <div style="margin: 5px 35px;">
-                                <button class="layui-btn" v-on:click="editQuestion(item.id)">修改</button>
                             </div>
                         </div>
                 </div>

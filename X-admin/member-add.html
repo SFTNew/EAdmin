@@ -2,16 +2,18 @@
 <html class="x-admin-sm">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>添加问卷</title>
-    <meta name="renderer" content="webkit">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <meta name="viewport"
         content="width=device-width,user-scalable=yes, minimum-scale=0.4, initial-scale=0.8,target-densitydpi=low-dpi" />
-    <link rel="stylesheet" href="./css/font.css">
-    <link rel="stylesheet" href="./css/xadmin.css">
+    <link rel="stylesheet" href="./css/font.css" />
+    <link rel="stylesheet" href="./css/xadmin.css" />
     <script type="text/javascript" src="./lib/layui/layui.js" charset="utf-8"></script>
     <script type="text/javascript" src="./js/xadmin.js"></script>
+    <script type="text/javascript" src="./js/jquery.min.js"></script>
+    <script type="text/javascript" src="./js/vue.js"></script>
     <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
     <!--[if lt IE 9]>
             <script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
@@ -26,10 +28,9 @@
                 <div class="layui-form-item">
                     <label for="L_email" class="layui-form-label">
                         <span class="x-red">*</span>问卷标题</label>
-                    <div class="layui-input-inline">
-                        <input type="text" required="" lay-verify="nikename" autocomplete="off" class="layui-input"
-                            v-model="title">
-                    </div>
+                    <div style="margin: 0 35px;">
+                        <textarea required="" lay-verify="nikename" v-model="title" autocomplete="off"
+                            class="layui-textarea"></textarea></div>
                 </div>
                 <div class="layui-form-item">
                     <label for="L_username" class="layui-form-label">
@@ -38,13 +39,33 @@
                         <textarea required="" lay-verify="nikename" v-model="content" autocomplete="off"
                             class="layui-textarea"></textarea></div>
                 </div>
-                <div id="questions">
 
+                <div class="layui-form-item" v-for="item,index in questions" :key="index">
+                    <label for="L_username" class="layui-form-pane">
+                        <span v-html="index+1"></span>.{{item.title}}</label>
+                    <div v-if="item.type==0">
+                        <div style="margin: 0 35px;" class="layui-form-item" v-for="i in item.content.split(',')"
+                            :key="i">
+                            <input type="radio" :name="index+1" :title="i" class="layui-form-radio">
+                        </div>
+                    </div>
+                    <div v-else-if="item.type==1">
+                        <div style="margin: 0 35px;" class="layui-form-item" v-for="i in item.content.split(',')"
+                            :key="i">
+                            <input  type="checkbox" :name="index+1" :title="i" class="layui-form-checkbox">
+                        </div>
+                    </div>
+                    <div v-else>
+                        <div style="margin: 0 35px;" class="layui-form-item">
+                            <textarea type="checkbox" class="layui-textarea"></textarea>
+                        </div>
+                    </div>
                 </div>
+
                 <div id="addQuestion" class="layui-form-item">
                     <label for="L_repass" class="layui-form-label">问题类型</label>
-                    <div class="layui-input-inline">
-                        <select v-model="type" class="valid">
+                    <div class="layui-input-inline layui-show-xs-block">
+                        <select id="type">
                             <option value="0" selected>单选题</option>
                             <option value="1">多选题</option>
                             <option value="2">填空题</option>
@@ -61,26 +82,27 @@
             </div>
         </div>
     </div>
-    <script type="text/javascript" src="./js/jquery.min.js"></script>
-    <script type="text/javascript" src="./js/vue.js"></script>
-    <script type="text/javascript" src="./js/xadmin.js"></script>
+
     <script>
+
 
         var addQuestions = new Vue({
             el: ".layui-fluid",
             data: {
-                id: 0,
-                title: "",
-                content: "",
+                id: 8,
+                title: "问卷调查333",
+                content: "问卷调查333问卷调查333问卷调查333",
                 sort: 0,
-                type: 0,
+                questions:new Array(),
             },
             methods: {
                 saveQuestionnaire: function () {
+                    var that = this;
                     var param = {
                         question: this.title,
                         content: this.content,
-                        status: 0
+                        status: 0,
+                        questions: new Array(),
                     }
                     if (this.id == 0) {
                         $.ajax({
@@ -90,8 +112,9 @@
                             contentType: 'application/json',
                             data: JSON.stringify(param),
                             success: function (res) {
+                                console.log(res)
                                 if (res.code == 0) {
-                                    this.id = res.data
+                                    that.id = res.data
                                     $("#addQuestion").show();
                                 } else {
                                     layui.msg("添加失败," + res.msg)
@@ -106,14 +129,27 @@
                     }
 
                 },
+                loadQuestion: function () {
+                    var that = this;
+                    if (this.id != 0) {
+                        $.get(baseUrl + "que/v1/q/" + this.id, res => {
+                            console.log(res);
+                            that.questions = res.data;
+                        })
+                    }
+                },
                 webAddQuestion: function () {
-                    xadmin.open('添加单选问题', './question.html?id='+this.id)
+                    var type = $("#type").val()
+                    xadmin.open('添加问题', './question.html?id=' + this.id + "&type=" + type)
                 },
             },
             created: function () {
-                $("#addQuestion").hide();
+                // $("#addQuestion").hide();
+                this.loadQuestion();
             }
         })
+
+
         layui.use(['form', 'layer', 'jquery'],
             function () {
                 $ = layui.jquery;
@@ -153,7 +189,9 @@
                 //         return false;
                 //     });
 
-            });</script>
+            });
+
+    </script>
 
 </body>
 

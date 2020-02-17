@@ -1,4 +1,4 @@
-let baseUrl = "http://127.0.0.1:8082/"
+let baseUrl = "http://127.0.0.1:8082/";
 
 ;!function (win) {
 	"use strict";
@@ -50,7 +50,7 @@ let baseUrl = "http://127.0.0.1:8082/"
   }
   Xadmin.prototype.dateFtt = function(fmt,val){
     var date = new Date(val);
-    return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
+    return date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate() +" "+ date.getHours() + ":"+date.getMinutes()+":"+date.getSeconds();
   }
 
   Xadmin.prototype.getUrlParam = function(name){

@@ -61,7 +61,7 @@
                     var html = '<div class="layui-form-item">' +
                         ' <label for="L_repass" class="layui-form-label">问题答案' + this.sort + '</label>' +
                         '<div class="layui-input-inline"><input type="text" id="answer' + this.sort + '" required="" ' +
-                        '  autocomplete="off" class="layui-input"></div>' +
+                        '  autocomplete="off" class="layui-input"><a style="color:red;" herf="javascript:;" onClick="remoteAnswer(this)">删除</a></div>' +
                         '</div>';
                     $("#answers").append(html);
                 },
@@ -112,6 +112,10 @@
             }
 
         })
+    function remoteAnswer(obj){
+        $(obj).remove();
+    }
+        
     </script>
 </body>
 

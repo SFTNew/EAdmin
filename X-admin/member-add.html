@@ -41,23 +41,25 @@
                 </div>
 
                 <div class="layui-form-item" v-for="item,index in questions" :key="index">
-                    <label for="L_username" class="layui-form-pane">
-                        <span v-html="index+1"></span>.{{item.title}}</label>
+                    <label for="L_username" class="layui-form-pane" style="margin: 5px;">
+                        <span v-html="index+1"></span>.{{item.title}}&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:;" style="color: red;" v-on:click="deleteQuestion(item.id)">删除</a></label>
                     <div v-if="item.type==0">
                         <div style="margin: 0 35px;" class="layui-form-item" v-for="i in item.content.split(',')"
                             :key="i">
                             <input type="radio" :name="index+1" :title="i" class="layui-form-radio">
+                            &nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:;" style="color: red;" v-on:click="deleteAnswer(item.id)">删除</a>
                         </div>
                     </div>
                     <div v-else-if="item.type==1">
                         <div style="margin: 0 35px;" class="layui-form-item" v-for="i in item.content.split(',')"
                             :key="i">
                             <input  type="checkbox" :name="index+1" :title="i" class="layui-form-checkbox">
+                            &nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:;" style="color: red;" v-on:click="deleteAnswer(item.id)">删除</a>
                         </div>
                     </div>
                     <div v-else>
                         <div style="margin: 0 35px;" class="layui-form-item">
-                            <textarea type="checkbox" class="layui-textarea"></textarea>
+                            <textarea type="checkbox" class="layui-textarea" disabled></textarea>
                         </div>
                     </div>
                 </div>
@@ -117,11 +119,12 @@
                                     that.id = res.data
                                     $("#addQuestion").show();
                                 } else {
-                                    layui.msg("添加失败," + res.msg)
+                                    layer.msg("添加失败," + res.msg)
                                 }
                             }
                         })
                     } else {
+                        parent.questionnaireList.loadQuestion();
                         //关闭当前frame
                         xadmin.close();
                         // 可以对父窗口进行刷新 
@@ -142,9 +145,48 @@
                     var type = $("#type").val()
                     xadmin.open('添加问题', './question.html?id=' + this.id + "&type=" + type)
                 },
+                deleteQuestion:function(id){
+                    var that = this;
+                    layer.confirm('确认要删除吗？',function(index){
+                        //发异步删除数据
+                        $.ajax({
+                        url:baseUrl+"qs/v1/"+id,
+                        type:"delete",
+                        success:function(res){
+                            console.log(res);
+                            if(res.code==0){
+                                that.loadQuestion();
+                            }else{
+                                layer.msg("删除失败");
+                            }
+                        }
+                    })
+                        layer.msg('已删除!',{icon:1,time:1000});
+                    });
+                    
+                },
+                deleteAnswer:function(id){
+                    var that = this;
+                    layer.confirm('确认要删除吗？',function(index){
+                        //发异步删除数据
+                        $.ajax({
+                        url:baseUrl+"as/v1/"+id,
+                        type:"delete",
+                        success:function(res){
+                            console.log(res);
+                            if(res.code==0){
+                                that.loadQuestion();
+                            }else{
+                                layer.msg("删除失败");
+                            }
+                        }
+                    })
+                        layer.msg('已删除!',{icon:1,time:1000});
+                    });
+                }
             },
             created: function () {
-                // $("#addQuestion").hide();
+                $("#addQuestion").hide();
                 this.loadQuestion();
             }
         })

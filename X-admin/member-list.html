@@ -76,7 +76,7 @@
                                         <i class="layui-icon" v-if="item.status==0">&#xe601;</i>
                                         <i class="layui-icon" v-else>&#xe62f;</i>
                                       </a>
-                                      <a title="编辑"  onclick="xadmin.open('编辑','member-edit.html',0,0,true)" href="javascript:;">
+                                      <a title="编辑"  v-on:click="questionnaire_edit(item)" href="javascript:;">
                                         <i class="layui-icon">&#xe642;</i>
                                       </a>
                                       <a v-on:click="pushQuestion(item.id)" title="发布" href="javascript:;">
@@ -125,6 +125,9 @@
           },
           pushQuestion:function(id){
             
+          },
+          questionnaire_edit:function(item){
+            xadmin.open('编辑','member-add.html?id='+item.id,0,0,true)
           },
           questionnaire_del:function(event,id){
             var obj = event.target;

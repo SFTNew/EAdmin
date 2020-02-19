@@ -24,37 +24,40 @@
 <body>
     <div class="layui-fluid">
         <div class="layui-row">
-            <div class="layui-form">
-                <div class="layui-form-item">
+            <div class="layui-form layui-form-pane">
+                <div class="layui-form-item " pane>
                     <label for="L_email" class="layui-form-label">
                         <span class="x-red">*</span>问卷标题</label>
-                    <div style="margin: 0 35px;">
+                    <div class="layui-input-block">
                         <textarea required="" lay-verify="nikename" v-model="title" autocomplete="off"
                             class="layui-textarea"></textarea></div>
                 </div>
-                <div class="layui-form-item">
+                <div class="layui-form-item" pane>
                     <label for="L_username" class="layui-form-label">
                         <span class="x-red">*</span>问卷简介</label>
-                    <div style="margin: 0 35px;">
+                    <div class="layui-input-block">
                         <textarea required="" lay-verify="nikename" v-model="content" autocomplete="off"
                             class="layui-textarea"></textarea></div>
                 </div>
 
                 <div class="layui-form-item" v-for="item,index in questions" :key="index">
                     <label for="L_username" class="layui-form-pane" style="margin: 5px;">
-                        <span v-html="index+1"></span>.{{item.title}}&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:;" style="color: red;" v-on:click="deleteQuestion(item.id)">删除</a></label>
-                    <div v-if="item.type==0">
-                        <div style="margin: 0 35px;" class="layui-form-item" v-for="i in item.content.split(',')"
+                        <span v-html="index+1"></span>.{{item.title}}&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:;" title="删除" v-on:click="deleteQuestion(item.id)"><i class="layui-icon">&#xe640;</i></a></label>
+                        &nbsp;&nbsp;<a href="javascript:;" title="修改"  v-on:click="updateQuestion(item)"> <i class="layui-icon">&#xe642;</i></a>
+                        <div v-if="item.type==0">
+                        <div style="margin: 0 35px;" class="layui-form-item" v-for="i in item.answers"
                             :key="i">
-                            <input type="radio" :name="index+1" :title="i" class="layui-form-radio">
-                            &nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:;" style="color: red;" v-on:click="deleteAnswer(item.id)">删除</a>
+                            <input type="radio" :name="index+1" :title="i.content" class="layui-form-radio">
+                            &nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:;" title="删除"  v-on:click="deleteAnswer(i.id)"> <i class="layui-icon">&#xe640;</i></a>
+                            &nbsp;&nbsp;<a href="javascript:;" title="修改"  v-on:click="updateAnswer(i)"> <i class="layui-icon">&#xe642;</i></a>
                         </div>
                     </div>
                     <div v-else-if="item.type==1">
-                        <div style="margin: 0 35px;" class="layui-form-item" v-for="i in item.content.split(',')"
+                        <div style="margin: 0 35px;" class="layui-form-item" v-for="i in item.answers"
                             :key="i">
-                            <input  type="checkbox" :name="index+1" :title="i" class="layui-form-checkbox">
-                            &nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:;" style="color: red;" v-on:click="deleteAnswer(item.id)">删除</a>
+                            <input  type="checkbox" lay-skin="primary" :name="index+1" :title="i.content" class="layui-form-checkbox">
+                            &nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:;" title="删除"  v-on:click="deleteAnswer(i)"> <i class="layui-icon">&#xe640;</i></a>
+                            &nbsp;&nbsp;<a href="javascript:;" title="修改"  v-on:click="updateAnswer(i.id)"> <i class="layui-icon">&#xe642;</i></a>
                         </div>
                     </div>
                     <div v-else>
@@ -65,20 +68,19 @@
                 </div>
 
                 <div id="addQuestion" class="layui-form-item">
-                    <label for="L_repass" class="layui-form-label">问题类型</label>
+                    <!-- <label for="L_repass" class="layui-form-label">问题类型</label>
                     <div class="layui-input-inline layui-show-xs-block">
                         <select id="type">
                             <option value="0" selected>单选题</option>
                             <option value="1">多选题</option>
                             <option value="2">填空题</option>
                         </select>
-                    </div>
+                    </div> -->
                     <button class="layui-btn" lay-filter="add_question" v-on:click="webAddQuestion">增加问题</button>
 
                 </div>
                 <div class="layui-form-item">
-                    <label for="L_repass" class="layui-form-label"></label>
-                    <button class="layui-btn" lay-filter="add" lay-submit="" v-on:click="saveQuestionnaire">保存</button>
+                    <button style="margin-left:35px;" class="layui-btn" lay-filter="add" lay-submit="" v-on:click="saveQuestionnaire">保存</button>
                 </div>
 
             </div>
@@ -91,10 +93,11 @@
         var addQuestions = new Vue({
             el: ".layui-fluid",
             data: {
-                id: 8,
+                id: 0,
                 title: "问卷调查333",
                 content: "问卷调查333问卷调查333问卷调查333",
                 sort: 0,
+                isEdit:false,
                 questions:new Array(),
             },
             methods: {
@@ -124,7 +127,28 @@
                             }
                         })
                     } else {
-                        parent.questionnaireList.loadQuestion();
+                        if(this.isEdit){
+                            var param = {
+                                question: this.title,
+                                content: this.content,
+                                status: 0,
+                            }
+                            $.ajax({
+                                url:baseUrl+"que/v1/"+this.id,
+                                type:"put",
+                                dataType: 'json',
+                                contentType: 'application/json',
+                                data: JSON.stringify(param),
+                                success:function(res){
+                                    if(res.code == 0){
+                                        console.log(res)
+                                    }else{
+                                        layer.msg("修改失败," + res.msg)
+                                    }
+                                }
+                            })
+                        }
+                        // parent.questionnaireList.loadList();
                         //关闭当前frame
                         xadmin.close();
                         // 可以对父窗口进行刷新 
@@ -137,13 +161,15 @@
                     if (this.id != 0) {
                         $.get(baseUrl + "que/v1/q/" + this.id, res => {
                             console.log(res);
+                            that.questions = [];
                             that.questions = res.data;
                         })
                     }
                 },
                 webAddQuestion: function () {
-                    var type = $("#type").val()
-                    xadmin.open('添加问题', './question.html?id=' + this.id + "&type=" + type)
+                    // var type = $("#type").val()
+                    console.log(this.id);
+                    xadmin.open('添加问题', './question.html?qid=' + this.id + "&type=0")
                 },
                 deleteQuestion:function(id){
                     var that = this;
@@ -183,11 +209,22 @@
                     })
                         layer.msg('已删除!',{icon:1,time:1000});
                     });
+                },
+                updateAnswer:function(item){
+                    xadmin.open("修改答案","./updateAnswer.html?id="+item.id+"&content="+escape(item.content),600,180);
+                },
+                updateQuestion:function(item){
+                    xadmin.open("修改问题","./question.html?id="+item.id+"&type="+item.type);
                 }
             },
             created: function () {
-                $("#addQuestion").hide();
-                this.loadQuestion();
+                this.id = xadmin.getUrlParam("id");
+                if(this.id!=0){
+                    this.isEdit = true;
+                    this.loadQuestion();
+                }else{
+                    $("#addQuestion").hide();
+                } 
             }
         })
 
